@@ -109,5 +109,6 @@ bool lldriver_ns::Lidarlite_driver::readparams()
     //vars
     if(!nodeHandle_.getParam("robot_ns", robot_ns_)) return false;
     if(!nodeHandle_.getParam("lidar_rate", lidar_rate_)) return false;
+    if(!nodeHandle_.getParam("tf_prefix", tf_prefix_)) return false;
     return true;
 }
