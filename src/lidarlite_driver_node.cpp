@@ -41,7 +41,7 @@ int main(int argc, char** argv)
  
     try
     {
-        lidar_obj.runloop(); //main while loop runs inside
+        lidar_obj.measurementloop(); //main measurment while loop runs inside
     }
     catch (ros::Exception &re)
     {

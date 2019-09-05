@@ -38,7 +38,7 @@
 #include "unistd.h"
 #include <iostream>
 #include <cmath>
-//#include <string>
+#include <string>
 //#include <vector>
 
 // ROS includes
@@ -64,14 +64,13 @@ namespace lldriver_ns
 			Lidarlite_driver(ros::NodeHandle& nodeHandle);
 			virtual ~Lidarlite_driver();
 
-			void runloop();
+			void measurementloop();
 		private:
 			ros::NodeHandle& nodeHandle_;
 		   	ros::Publisher rangePub_;
 			//ros::ServiceServer zeroingRangeSrv_;
 			std::string robot_ns_, tf_prefix_;
 			double current_range_, lidar_rate_;
-			//void updateHome(geometry_msgs::PoseStamped msg);
 			bool readparams();
 			void ros_reg_topics();
 	};	//Lidarlite_driver_class

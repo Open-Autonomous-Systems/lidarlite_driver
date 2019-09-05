@@ -38,12 +38,14 @@ lldriver_ns::Lidarlite_driver::Lidarlite_driver(ros::NodeHandle& nodeHandle) :no
     ROS_ASSERT(readparams());
     ros_reg_topics();
     ROS_DEBUG("Lidarlite_driver constructor success");
-}                 
+}
+
 lldriver_ns::Lidarlite_driver::~Lidarlite_driver()
 {
 
 }
-void lldriver_ns::Lidarlite_driver::runloop()
+
+void lldriver_ns::Lidarlite_driver::measurementloop()
 {
     try
     {
@@ -51,31 +53,46 @@ void lldriver_ns::Lidarlite_driver::runloop()
         int err = lidarLite->openLidarLite();
         if (err < 0)
         {
-            printf("Error: %d", lidarLite->error);
+            ROS_FATAL("Error: %d", lidarLite->error);
         }
         else
         {
             int hardwareVersion = lidarLite->getHardwareVersion() ;
             int softwareVersion = lidarLite->getSoftwareVersion() ;
-            printf("Hardware Version: %d\n",hardwareVersion) ;
-            printf("Software Version: %d\n",softwareVersion) ;
+            ROS_INFO("Hardware Version: %d\n",hardwareVersion) ;
+            ROS_INFO("Software Version: %d\n",softwareVersion) ;
+        }
+
+        ros::Rate loop_rate(lidar_rate_);
+        std::string sensorFrameId = tf_prefix_ + "/lidarlite";
+
+        while(ros::ok() && lidarLite->error >= 0)
+        {
+            loop_rate.sleep();
+            int distance = lidarLite->getDistance();
+
+            if (distance < 0)
+            {
+                int llError ;
+                llError = lidarLite->getError();
+                ROS_ERROR("Lidar-Lite error: %d\n",llError);
+            }
+
+            sensor_msgs::Range rangeMsg;
+            rangeMsg.header.stamp = ros::Time::now();
+            rangeMsg.header.frame_id = sensorFrameId;
+            rangeMsg.radiation_type = sensor_msgs::Range::INFRARED;
+            rangeMsg.field_of_view = 0.008; //8 milliRadians
+            rangeMsg.min_range = 0.01; //approx 1 cm
+            rangeMsg.max_range = 40.0; //max distance of 40.0 M
+            rangeMsg.range = float(distance)/100.0; //converting cm to M
+            rangePub_.publish(rangeMsg);
+            ros::spinOnce();
         }
     }
     catch(...)
     {
-        std::cout<<"error in"<<std::endl;
-    }
-    
-    ros::Rate loop_rate(lidar_rate_);
-    while(ros::ok())
-    {
-        loop_rate.sleep();
-        
-		sensor_msgs::Range RangeMsg;
-        RangeMsg.header.stamp = ros::Time::now();
-        RangeMsg.range = current_range_;
-    
-        ros::spinOnce();
+        ROS_ERROR("ran into exception in measurementloop() ");
     }
 }
 void lldriver_ns::Lidarlite_driver::ros_reg_topics()
