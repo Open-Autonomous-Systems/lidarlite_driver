@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>lidarlite_driver</name>
+  <version>1.0.0</version>
+  <description>The ros package for lidarlite range sensor</description>
+  <maintainer email="diddi.m@husky.neu.edu">mithun</maintainer>
+
+  <license>MIT</license>
+  <url type="website">https://web.northeastern.edu/fieldrobotics</url>
+  <buildtool_depend>catkin</buildtool_depend>
+		<depend>roscpp</depend>
+		<depend>sensor_msgs</depend>
+		<depend>tf</depend>
+</package>
