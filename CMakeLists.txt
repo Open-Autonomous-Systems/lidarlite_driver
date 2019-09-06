@@ -8,7 +8,7 @@ set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/" CACHE PATH "Project Inc
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
-  tf
+  #tf
   roslaunch
 )
 roslaunch_add_file_check(launch)
@@ -22,7 +22,7 @@ elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif()
 
-catkin_python_setup()
+#catkin_python_setup()
 
 #add_service_files(
 #  FILES Basetasks.srv
