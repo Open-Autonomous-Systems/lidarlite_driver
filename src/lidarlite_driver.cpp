@@ -64,7 +64,7 @@ void lldriver_ns::Lidarlite_driver::measurementloop()
         }
 
         ros::Rate loop_rate(lidar_rate_);
-        std::string sensorFrameId = tf_prefix_ + "/lidarlite";
+        std::string sensorFrameId = tf_prefix_ + "/lidarlite_down";
 
         while(ros::ok() && lidarLite_->error >= 0)
         {

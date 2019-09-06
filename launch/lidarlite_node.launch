@@ -41,7 +41,7 @@
 
 	<!-- args  -->
 	<arg name="robot_ns"     default="$(env ROBOT_NAME)" />
-    <arg name="lidar_rate"   default="40" />
+    <arg name="lidar_rate"   default="60" />
 
 
 
