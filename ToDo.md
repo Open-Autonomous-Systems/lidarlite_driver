@@ -9,3 +9,6 @@
 5. adding sort of median filter to account for sudden spikes in range measurment and smoothen out measurements.
 6. adding readme on how to use and ros wiki page
 7. (optional) add urdf with cad model
+8. add diagnostic publisher
+9. add filtered output
+10. add ablitiy to do insitu calibration or calculate co-eff for filter by running a diff node while static above 1m.
