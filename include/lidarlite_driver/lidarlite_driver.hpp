@@ -3,7 +3,7 @@
  * @author      Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @maintainer  Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @website    https://web.northeastern.edu/fieldrobotics                  *
- * @copyright (c) 2018, Northeastern University Field Robotics Lab(NEUFRL),*
+ * @copyright (c) 2019, Northeastern University Field Robotics Lab(NEUFRL),*
  *             All rights reserved.                                        *
  *                                                                         *
  * Permission is hereby granted, free of charge, to any person obtaining   *
@@ -38,11 +38,15 @@
 #include "unistd.h"
 #include <iostream>
 #include <string>
-
+// boost includes
+#include <boost/thread.hpp>
 // ROS includes
 #include <ros/ros.h>
 #include <ros/console.h>
-
+// nodelet includes
+#include "nodelet/nodelet.h"
+#include <nodelet/loader.h>
+#include "pluginlib/class_list_macros.h"
 //#include <tf/tf.h>
 #include <sensor_msgs/Range.h>
 
@@ -52,22 +56,24 @@
 
 namespace lldriver_ns
 {
-	class Lidarlite_driver
+	class Lidarlite_driver: public nodelet::Nodelet
 	{
 		public:
-			Lidarlite_driver(ros::NodeHandle& nodeHandle);
+			Lidarlite_driver();
 			virtual ~Lidarlite_driver();
 
 			void measurementloop();
 		private:
-			ros::NodeHandle& nodeHandle_;
+			virtual void onInit();
+			ros::NodeHandle nodeHandle_,nodeHandlePvt_;
 		   	ros::Publisher rangePub_;
 			//ros::ServiceServer zeroingRangeSrv_;
-			std::string robot_ns_, tf_prefix_;
+			std::string robot_ns_, tf_prefix_, sensor_location_;
 			double lidar_rate_;
 			bool readparams();
 			void ros_reg_topics();
     	    LidarLite *lidarLite_ = new LidarLite();
-	};	//Lidarlite_driver_class
+        	std::unique_ptr<boost::thread> MeasurementThread_;
+    };	//Lidarlite_driver_class
 } // lldriver_ns
 #endif // LIDARLITE_DRIVER_H

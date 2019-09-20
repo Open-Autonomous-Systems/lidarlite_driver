@@ -3,7 +3,7 @@
  * @author      Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @maintainer  Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @website    https://web.northeastern.edu/fieldrobotics                  *
- * @copyright (c) 2018, Northeastern University Field Robotics Lab(NEUFRL),*
+ * @copyright (c) 2019, Northeastern University Field Robotics Lab(NEUFRL),*
  *             All rights reserved.                                        *
  *                                                                         *
  * Permission is hereby granted, free of charge, to any person obtaining   *
@@ -36,25 +36,12 @@
 int main(int argc, char** argv)
 {
     ros::init(argc, argv,"lidarlite_node");
-	ros::NodeHandle nodeHandle("~");
-	lldriver_ns::Lidarlite_driver lidar_obj(nodeHandle);
- 
-    try
-    {
-        lidar_obj.measurementloop(); //main measurment while loop runs inside
-    }
-    catch (ros::Exception &re)
-    {
-        ROS_ERROR("ros Exception occured: %s ", re.what());
-    }
-    catch(const std::exception &st_e)
-    {
-        ROS_FATAL_STREAM("std Exception: "<<st_e.what());
-    }
-    catch(...)
-    {
-        ROS_FATAL_STREAM("Some unknown exception occured");
-    }
+    nodelet::Loader nodelet;
+    nodelet::M_string remap(ros::names::getRemappings());
+    nodelet::V_string nargv;
+    std::string nodelet_name = ros::this_node::getName();
+    nodelet.load(nodelet_name, "lldriver_ns/Lidarlite_driver", remap, nargv);
+    
     ros::waitForShutdown(); //blocking call
 	return 0;
 }
