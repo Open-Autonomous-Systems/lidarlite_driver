@@ -61,6 +61,7 @@ void lldriver_ns::Lidarlite_driver::onInit()
     nodeHandlePvt_ = getPrivateNodeHandle();
     ROS_ASSERT(readparams());
     ros_reg_topics();
+    lidarLite_ = new LidarLite(i2cBus_);
     MeasurementThread_.reset(new boost::thread(boost::bind(&lldriver_ns::Lidarlite_driver::measurementloop, this)));
     NODELET_INFO("Lidarlite_driver onInit success");
 }
@@ -139,6 +140,7 @@ bool lldriver_ns::Lidarlite_driver::readparams()
     //vars
     nodeHandlePvt_.param<std::string>("robot_ns", robot_ns_,"");
     nodeHandlePvt_.param<double>("lidar_rate", lidar_rate_, 50.0);
+    nodeHandlePvt_.param<int>("i2cBus", i2cBus_, 0);
     nodeHandlePvt_.param<std::string>("tf_prefix", tf_prefix_, "");
     nodeHandlePvt_.param<std::string>("sensor_location", sensor_location_, "");
 
