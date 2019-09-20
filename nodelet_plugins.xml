@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<library path="lib/liblidarlite_driver_lib">
+  <class name="lldriver_ns/Lidarlite_driver" type="lldriver_ns::Lidarlite_driver" base_class_type="nodelet::Nodelet">
+    <description>
+      Lidarlite ROS wrapper
+    </description>
+  </class>
+</library>

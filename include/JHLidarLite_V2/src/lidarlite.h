@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <iostream>
 
 // Information taken from PulsedLight knowledge base 5-4-15
 // Internal Control Registers
@@ -66,10 +66,10 @@
 class LidarLite
 {
 public:
-    unsigned char kI2CBus ;         // I2C bus of the Lidar-Lite
+    int kI2CBus ;         // I2C bus of the Lidar-Lite
     int kI2CFileDescriptor ;        // File Descriptor to the Lidar-Lite
     int error ;
-    LidarLite();
+    LidarLite(int i2CBus);
     ~LidarLite() ;
     bool openLidarLite() ;                   // Open the I2C bus to the Lidar-Lite
     void closeLidarLite();                   // Close the I2C bus to the Lidar-Lite

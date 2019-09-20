@@ -8,6 +8,7 @@ set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/" CACHE PATH "Project Inc
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  nodelet
   #tf
   roslaunch
 )
@@ -30,6 +31,7 @@ endif()
 
 catkin_package(
   CATKIN_DEPENDS
+  nodelet
 )
 include_directories(
   include
@@ -37,6 +39,9 @@ include_directories(
   ${PROJECT_INCLUDE_DIR}
   ${Boost_INCLUDE_DIR}
 )
+
+add_library(lidarlite_driver_lib src/lidarlite_driver.cpp include/JHLidarLite_V2/src/lidarlite.cpp)
+target_link_libraries(lidarlite_driver_lib ${catkin_LIBRARIES})
 
 link_libraries(
   ${catkin_LIBRARIES}
@@ -48,15 +53,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++11")
 
 
 
-add_executable (lidarlite_node 
-src/lidarlite_driver_node.cpp
-src/lidarlite_driver.cpp 
-include/JHLidarLite_V2/src/lidarlite.cpp
-)
+add_executable (lidarlite_node src/lidarlite_driver_node.cpp)
 #add_dependencies(lidarlite_node)
 target_link_libraries(lidarlite_node ${catkin_LIBRARIES})
 
-install(TARGETS lidarlite_node
+install(TARGETS lidarlite_node lidarlite_driver_lib
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -71,4 +72,8 @@ install(DIRECTORY launch
 )
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(FILES nodelet_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

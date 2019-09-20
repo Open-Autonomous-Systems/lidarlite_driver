@@ -3,7 +3,7 @@
  * @author      Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @maintainer  Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @website    https://web.northeastern.edu/fieldrobotics                  *
- * @copyright (c) 2018, Northeastern University Field Robotics Lab(NEUFRL),*
+ * @copyright (c) 2019, Northeastern University Field Robotics Lab(NEUFRL),*
  *             All rights reserved.                                        *
  *                                                                         *
  * Permission is hereby granted, free of charge, to any person obtaining   *
@@ -33,17 +33,37 @@
  
 #include "lidarlite_driver/lidarlite_driver.hpp"
 
-lldriver_ns::Lidarlite_driver::Lidarlite_driver(ros::NodeHandle& nodeHandle) :nodeHandle_(nodeHandle)
+PLUGINLIB_EXPORT_CLASS(lldriver_ns::Lidarlite_driver, nodelet::Nodelet)
+
+lldriver_ns::Lidarlite_driver::Lidarlite_driver()
 {
-    ROS_ASSERT(readparams());
-    ros_reg_topics();
-    ROS_DEBUG("Lidarlite_driver constructor success");
+    // nodelet set me free!!
 }
 
 lldriver_ns::Lidarlite_driver::~Lidarlite_driver()
 {
+    // Interrupt Measurment thread if not intrepputed already by sigint
+    // wait for it to join
+    if (MeasurementThread_)
+    {
+        MeasurementThread_->interrupt();
+        MeasurementThread_->join();
+    }
+    MeasurementThread_.reset();
+    // close i2c port and delete obj
     if(lidarLite_->kI2CFileDescriptor > 0) lidarLite_->closeLidarLite();
     delete lidarLite_;
+}
+
+void lldriver_ns::Lidarlite_driver::onInit()
+{
+    nodeHandle_ = getNodeHandle();
+    nodeHandlePvt_ = getPrivateNodeHandle();
+    ROS_ASSERT(readparams());
+    ros_reg_topics();
+    lidarLite_ = new LidarLite(i2cBus_);
+    MeasurementThread_.reset(new boost::thread(boost::bind(&lldriver_ns::Lidarlite_driver::measurementloop, this)));
+    NODELET_INFO("Lidarlite_driver onInit success");
 }
 
 void lldriver_ns::Lidarlite_driver::measurementloop()
@@ -53,18 +73,23 @@ void lldriver_ns::Lidarlite_driver::measurementloop()
         int err = lidarLite_->openLidarLite();
         if (err < 0)
         {
-            ROS_FATAL("Error: %d", lidarLite_->error);
+            NODELET_FATAL("Error: %d", lidarLite_->error);
         }
         else
         {
             int hardwareVersion = lidarLite_->getHardwareVersion() ;
             int softwareVersion = lidarLite_->getSoftwareVersion() ;
-            ROS_INFO("Hardware Version: %d\n",hardwareVersion) ;
-            ROS_INFO("Software Version: %d\n",softwareVersion) ;
+            NODELET_INFO("Hardware Version: %d\n",hardwareVersion) ;
+            NODELET_INFO("Software Version: %d\n",softwareVersion) ;
         }
 
         ros::Rate loop_rate(lidar_rate_);
-        std::string sensorFrameId = tf_prefix_ + "/lidarlite_down";
+        
+        std::string sensorFrameId;
+        if(sensor_location_.compare("")!=0)
+            sensorFrameId = tf_prefix_ + "/lidarlite" + "_" + sensor_location_;
+        else
+            sensorFrameId = tf_prefix_ + "/lidarlite";
 
         while(ros::ok() && lidarLite_->error >= 0)
         {
@@ -75,32 +100,36 @@ void lldriver_ns::Lidarlite_driver::measurementloop()
             {
                 int llError ;
                 llError = lidarLite_->getError();
-                ROS_ERROR("Lidar-Lite error: %d\n",llError);
+                NODELET_ERROR_THROTTLE(1,"Lidar-Lite error: %d\n",llError);
                 continue;
             }
 
-            sensor_msgs::Range rangeMsg;
-            rangeMsg.header.stamp = ros::Time::now();
-            rangeMsg.header.frame_id = sensorFrameId;
-            rangeMsg.radiation_type = sensor_msgs::Range::INFRARED;
-            rangeMsg.field_of_view = 0.008; //8 milliRadians
-            rangeMsg.min_range = 0.010; //approx 1 cm
-            rangeMsg.max_range = 40.0; //max distance of 40.0 M
-            rangeMsg.range = float(distance)/100.0; //converting cm to M
-            rangePub_.publish(rangeMsg);
+            sensor_msgs::RangePtr rangeMsgPtr;
+            rangeMsgPtr.reset(new sensor_msgs::Range());
+            rangeMsgPtr->header.stamp = ros::Time::now();
+            rangeMsgPtr->header.frame_id = sensorFrameId;
+            rangeMsgPtr->radiation_type = sensor_msgs::Range::INFRARED;
+            rangeMsgPtr->field_of_view = 0.008; //8 milliRadians
+            rangeMsgPtr->min_range = 0.010; //approx 1 cm
+            rangeMsgPtr->max_range = 40.0; //max distance of 40.0 M
+            rangeMsgPtr->range = float(distance)/100.0; //converting cm to M
+            rangePub_.publish(rangeMsgPtr);
             ros::spinOnce();
         }
     }
     catch(...)
     {
-        ROS_ERROR("ran into exception in measurementloop() ");
+        NODELET_ERROR("ran into exception in measurementloop() ");
         lidarLite_->closeLidarLite();
     }
 }
 void lldriver_ns::Lidarlite_driver::ros_reg_topics()
 {
     //publishers
-    rangePub_ = nodeHandle_.advertise<sensor_msgs::Range>(robot_ns_+"/lidarlite/range", 5);
+    std::string sensor_suffix;
+    if(sensor_location_.compare("")!=0) sensor_suffix= "/" + sensor_location_;
+
+    rangePub_ = nodeHandle_.advertise<sensor_msgs::Range>("lidarlite/range" +sensor_suffix, 5);
     //service server
     //zeroingRangeSrv_ = nodeHandle_.advertiseService(robot_ns_+"/lidarlite/setzero_position",
     //    &Lidarlite_driver::zeroing_cb, this);
@@ -109,8 +138,11 @@ void lldriver_ns::Lidarlite_driver::ros_reg_topics()
 bool lldriver_ns::Lidarlite_driver::readparams()
 {
     //vars
-    nodeHandle_.param<std::string>("robot_ns", robot_ns_,"");
-    nodeHandle_.param<double>("lidar_rate", lidar_rate_, 50.0);
-    nodeHandle_.param<std::string>("tf_prefix", tf_prefix_, "");
+    nodeHandlePvt_.param<std::string>("robot_ns", robot_ns_,"");
+    nodeHandlePvt_.param<double>("lidar_rate", lidar_rate_, 50.0);
+    nodeHandlePvt_.param<int>("i2cBus", i2cBus_, 0);
+    nodeHandlePvt_.param<std::string>("tf_prefix", tf_prefix_, "");
+    nodeHandlePvt_.param<std::string>("sensor_location", sensor_location_, "");
+
     return true;
 }

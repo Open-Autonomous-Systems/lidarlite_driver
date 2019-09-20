@@ -4,7 +4,7 @@
  * @author      Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @maintainer  Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @website    https://web.northeastern.edu/fieldrobotics                  *
- * @copyright (c) 2018, Northeastern University Field Robotics Lab(NEUFRL),*
+ * @copyright (c) 2019, Northeastern University Field Robotics Lab(NEUFRL),*
  *             All rights reserved.                                        *
  *                                                                         *
  * Permission is hereby granted, free of charge, to any person obtaining   *
@@ -34,21 +34,29 @@
 -->
 
 <launch>
-	<!-- configure console output verbosity mode:debug_console.conf or std_console.conf -->
-	<env name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/std_console.conf"/>
-    <arg name="debug"       default="true" doc="set True for debug messages"/>
-    <env if="$(arg debug)"  name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/debug_console.conf"/>
-
 	<!-- args  -->
-	<arg name="robot_ns"     default="$(env ROBOT_NAME)" />
-    <arg name="lidar_rate"   default="60" />
-
-
-
+	<arg name="robot_ns"            default="$(optenv ROBOT_NAME uas2)" />
+    <arg name="lidar_rate"          default="60" />
+    <arg name="i2cBus"              default="0" />
+    <arg name="sensor_location"     default=""  doc="(optional)in case of 
+        mulitple sensors, location eg: down can be added to msg_frame_id,
+        so frame_id looks like tf_prefix/lidarlite/range/down "/>
+   
+	<!-- configure console output verbosity
+         mode:debug_console.conf or std_console.conf -->
+    <arg name="debug"       default="true" doc="set True for debug messages"/>
+    
+  
+	<env name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/std_console.conf"/>
+    <env if="$(arg debug)"  name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/debug_console.conf"/>
+    
     <!--  Launch lidarlite_driver_node -->
-    <node pkg="lidarlite_driver" type="lidarlite_node" name="lidarlite_node" output="screen" clear_params="true" >
+    <node pkg="lidarlite_driver" type="lidarlite_node" name="lidarlite"
+             output="screen" clear_params="true" >
         <param name="robot_ns"    value="/$(arg robot_ns)" />
         <param name="tf_prefix"   value="$(arg robot_ns)" />
+        <param name="sensor_location"   value="$(arg sensor_location)" />
         <param name="lidar_rate"  value="$(arg lidar_rate)" />
+        <param name="i2cBus"            value="$(arg i2cBus)" type="int" />
     </node>
 </launch>

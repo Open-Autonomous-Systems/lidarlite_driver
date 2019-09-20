@@ -2,9 +2,9 @@
 // Interface for Lidar-Lite V2 (Blue Label) with NVIDIA Jetson TK1
 
 
-LidarLite::LidarLite()
+LidarLite::LidarLite(int i2CBus) : kI2CBus(i2CBus)
 {
-    kI2CBus = 0 ;           // Default I2C bus for Lidar-Lite on Jetson TK1
+    //kI2CBus = 0 ;           // Default I2C bus for Lidar-Lite on Jetson TK1
     error = 0 ;
 }
 
