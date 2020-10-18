@@ -40,7 +40,7 @@ include_directories(
   ${Boost_INCLUDE_DIR}
 )
 
-add_library(lidarlite_driver_lib src/lidarlite_driver.cpp src/lidarlite_filter.cpp include/JHLidarLite_V2/src/lidarlite.cpp)
+add_library(lidarlite_driver_lib src/lidarlite_driver.cpp src/lidarlite_filter.cpp include/JHLidarLite_V2/src/lidarlite.cpp include/JHLidarLite_V2/src/lidarlite.h)
 target_link_libraries(lidarlite_driver_lib ${catkin_LIBRARIES})
 
 link_libraries(
