@@ -73,8 +73,8 @@ namespace lldriver_ns
 			int i2cBus_;
 			bool readparams();
 			void ros_reg_topics();
-    	    LidarLite *lidarLite_;
-        	std::unique_ptr<boost::thread> MeasurementThread_;
+    	    		LidarLite *lidarLite_;
+        		std::unique_ptr<boost::thread> MeasurementThread_;
     };	//Lidarlite_driver_class
 } // lldriver_ns
 #endif // LIDARLITE_DRIVER_H
