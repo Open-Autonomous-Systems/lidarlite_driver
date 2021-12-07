@@ -38,7 +38,7 @@
 	<arg name="robot_ns"            default="$(optenv ROBOT_NAME uas2)" />
     <arg name="lidar_rate"          default="60" />
     <arg name="i2cBus"              default="0" />
-    <arg name="sensor_location"     default=""  doc="(optional)in case of 
+    <arg name="sensor_location"     default="down"  doc="(optional)in case of 
         mulitple sensors, location eg: down can be added to msg_frame_id,
         so frame_id looks like tf_prefix/lidarlite/range/down "/>
     
