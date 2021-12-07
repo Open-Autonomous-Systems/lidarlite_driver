@@ -42,7 +42,7 @@ lldriver_ns::Lidarlite_driver::Lidarlite_driver()
 
 lldriver_ns::Lidarlite_driver::~Lidarlite_driver()
 {
-    // Interrupt Measurment thread if not intrepputed already by sigint
+    // Interrupt Measurment thread if not interrupted already by sigint
     // wait for it to join
     if (MeasurementThread_)
     {
@@ -61,6 +61,7 @@ void lldriver_ns::Lidarlite_driver::onInit()
     nodeHandlePvt_ = getPrivateNodeHandle();
     ROS_ASSERT(readparams());
     ros_reg_topics();
+    LidarLite *lidarLite_;
     lidarLite_ = new LidarLite(i2cBus_);
     MeasurementThread_.reset(new boost::thread(boost::bind(&lldriver_ns::Lidarlite_driver::measurementloop, this)));
     NODELET_INFO("Lidarlite_driver onInit success");
