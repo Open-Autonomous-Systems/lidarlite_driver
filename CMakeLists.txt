@@ -22,7 +22,6 @@ if(Boost_FOUND)
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif()
-
 #catkin_python_setup()
 
 #add_service_files(
@@ -41,7 +40,7 @@ include_directories(
 )
 
 add_library(lidarlite_driver_lib src/lidarlite_driver.cpp src/lidarlite_filter.cpp include/JHLidarLite_V2/src/lidarlite.cpp include/JHLidarLite_V2/src/lidarlite.h)
-target_link_libraries(lidarlite_driver_lib ${catkin_LIBRARIES})
+target_link_libraries(lidarlite_driver_lib ${catkin_LIBRARIES} i2c)
 
 link_libraries(
   ${catkin_LIBRARIES}

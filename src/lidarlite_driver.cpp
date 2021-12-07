@@ -61,7 +61,7 @@ void lldriver_ns::Lidarlite_driver::onInit()
     nodeHandlePvt_ = getPrivateNodeHandle();
     ROS_ASSERT(readparams());
     ros_reg_topics();
-    LidarLite *lidarLite_;
+    //LidarLite *lidarLite_;
     lidarLite_ = new LidarLite(i2cBus_);
     MeasurementThread_.reset(new boost::thread(boost::bind(&lldriver_ns::Lidarlite_driver::measurementloop, this)));
     NODELET_INFO("Lidarlite_driver onInit success");
@@ -71,10 +71,11 @@ void lldriver_ns::Lidarlite_driver::measurementloop()
 {
     try
     {
-        int err = lidarLite_->openLidarLite();
-        if (err < 0)
+        bool err = lidarLite_->openLidarLite();
+        if (!err)
         {
             NODELET_FATAL("Error: %d", lidarLite_->error);
+            return;
         }
         else
         {
@@ -91,7 +92,8 @@ void lldriver_ns::Lidarlite_driver::measurementloop()
             sensorFrameId = tf_prefix_ + "/lidarlite" + "_" + sensor_location_;
         else
             sensorFrameId = tf_prefix_ + "/lidarlite";
-
+            
+            
         while(ros::ok() && lidarLite_->error >= 0)
         {
             loop_rate.sleep();
