@@ -25,12 +25,15 @@
 #ifndef LIDARLITE_H
 #define LIDARLITE_H
 #include <cstddef>
-extern "C" {
-#include <linux/i2c-dev.h>
-#include <linux/i2c.h>
-//#include <linux/i2c-smbus.h>
-#include <i2c/smbus.h>
-}
+#if defined(i2c_from_linux_1)
+    extern "C"{
+        #include <linux/i2c-dev.h>
+        #include <linux/i2c.h>
+        #include <i2c/smbus.h>
+    }
+#else
+    #include <linux/i2c-dev.h>
+#endif
 #include <sys/ioctl.h>
 #include <cstdlib>
 #include <cstdio>

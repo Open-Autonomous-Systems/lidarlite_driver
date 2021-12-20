@@ -1,8 +1,35 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidarlite_driver)
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
+########################################################
+# https://stackoverflow.com/a/63723420
+function(get_linux_lsb_release_information)
+  find_program(LSB_RELEASE_EXEC lsb_release)
+  if(NOT LSB_RELEASE_EXEC)
+    message(FATAL_ERROR "Could not detect lsb_release executable, can not gather required information")
+  endif()
 
+  execute_process(COMMAND "${LSB_RELEASE_EXEC}" --short --id OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "${LSB_RELEASE_EXEC}" --short --release OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "${LSB_RELEASE_EXEC}" --short --codename OUTPUT_VARIABLE LSB_RELEASE_CODENAME_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set(LSB_RELEASE_ID_SHORT "${LSB_RELEASE_ID_SHORT}" PARENT_SCOPE)
+  set(LSB_RELEASE_VERSION_SHORT "${LSB_RELEASE_VERSION_SHORT}" PARENT_SCOPE)
+  set(LSB_RELEASE_CODENAME_SHORT "${LSB_RELEASE_CODENAME_SHORT}" PARENT_SCOPE)
+endfunction()
+
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  get_linux_lsb_release_information()
+  if(${LSB_RELEASE_VERSION_SHORT} STREQUAL "16.04")
+    message("detected ubuntu 16")
+    set(i2c_from_linux "0")
+  else()
+    message("not ubuntu 16, include i2c headers from kernel")
+    set(i2c_from_linux "1")
+  endif()
+endif()
+add_definitions(-Di2c_from_linux_${i2c_from_linux})
+#############################################################################3
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/" CACHE PATH "Project Include Directory")
 
 find_package(catkin REQUIRED COMPONENTS
@@ -39,21 +66,30 @@ include_directories(
   ${Boost_INCLUDE_DIR}
 )
 
-add_library(lidarlite_driver_lib src/lidarlite_driver.cpp src/lidarlite_filter.cpp include/JHLidarLite_V2/src/lidarlite.cpp include/JHLidarLite_V2/src/lidarlite.h)
-target_link_libraries(lidarlite_driver_lib ${catkin_LIBRARIES} i2c)
+add_library(lidarlite_driver_lib src/lidarlite_driver.cpp
+        src/lidarlite_filter.cpp
+        include/JHLidarLite_V2/src/lidarlite.cpp
+        include/JHLidarLite_V2/src/lidarlite.h)
+
+if(${i2c_from_linux} STREQUAL 1)
+  set(ADDITIONAL_LIBRARIES i2c)
+else()
+  set(ADDITIONAL_LIBRARIES "")
+endif()
+
+target_link_libraries(lidarlite_driver_lib
+        ${catkin_LIBRARIES}
+        ${ADDITIONAL_LIBRARIES})
 
 link_libraries(
   ${catkin_LIBRARIES}
 )
 
-set (LIBS ${Boost_GENERAL}) # ${ROS_LIBS} profiler
+set (LIBS ${Boost_GENERAL})
 # Custom compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++11")
 
-
-
 add_executable (lidarlite_node src/lidarlite_driver_node.cpp)
-#add_dependencies(lidarlite_node)
 target_link_libraries(lidarlite_node ${catkin_LIBRARIES})
 
 install(TARGETS lidarlite_node lidarlite_driver_lib
@@ -62,10 +98,6 @@ install(TARGETS lidarlite_node lidarlite_driver_lib
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-#catkin_install_python(PROGRAMS scripts/idt_demoSelector.py 
-#scripts/make_squares_east_left.py scripts/mmwave_project.py 
-#DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-  
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
