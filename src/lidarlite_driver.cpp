@@ -62,12 +62,12 @@ void lldriver_ns::Lidarlite_driver::onInit()
     double measurementPeriod = 1.0/lidarRate;
     timer_ = nodeHandle_.createTimer( \
         ros::Duration(measurementPeriod),\
-        boost::bind(&lldriver_ns::Lidarlite_driver::measurementLoop,\
+        boost::bind(&lldriver_ns::Lidarlite_driver::getMeasurement,\
             this,_1));
     NODELET_INFO("LidarLite_driver:: onInit success");
 }
 
-void lldriver_ns::Lidarlite_driver::measurementLoop(const ros::TimerEvent& e)
+void lldriver_ns::Lidarlite_driver::getMeasurement(const ros::TimerEvent& e)
 {
     try
     {
@@ -113,14 +113,14 @@ void lldriver_ns::Lidarlite_driver::measurementLoop(const ros::TimerEvent& e)
     }
     catch(std::invalid_argument ex)
     {
-        NODELET_ERROR_THROTTLE(1.0,"lidarLite::measurementLoop:: exception "
+        NODELET_ERROR_THROTTLE(1.0,"lidarLite::getMeasurement:: exception "
                                    "%s", ex.what());
         //lidarLite_->closeLidarLite();
         //initializeSensor();
     }
     catch(...)
     {
-        NODELET_ERROR_THROTTLE(1.0,"lidarLite::measurementLoop:: exception ");
+        NODELET_ERROR_THROTTLE(1.0,"lidarLite::getMeasurement:: exception ");
     }
 }
 void lldriver_ns::Lidarlite_driver::register2Ros()

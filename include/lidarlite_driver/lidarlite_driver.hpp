@@ -74,7 +74,7 @@ namespace lldriver_ns
         bool initializeSensor();
         double lidarRate;
         ros::Timer timer_;
-        void measurementLoop(const ros::TimerEvent& e);
+        void getMeasurement(const ros::TimerEvent& e);
         std::shared_ptr<LidarLite> lidarLite_;
         //std::unique_ptr<boost::thread> MeasurementThread_;
         std::shared_ptr<FirFilter> lidarLiteFIR_;
