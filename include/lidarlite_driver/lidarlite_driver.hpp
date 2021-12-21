@@ -2,7 +2,7 @@
  * MIT License                                                             *
  * @author      Mithun Diddi <diddi.m@husky.neu.edu>                       *
  * @maintainer  Mithun Diddi <diddi.m@husky.neu.edu>                       *
- * @website    https://web.northeastern.edu/fieldrobotics                  *
+ * @website    https://fieldroboticslab.ece.northeastern.edu/              *
  * @copyright (c) 2019, Northeastern University Field Robotics Lab(NEUFRL),*
  *             All rights reserved.                                        *
  *                                                                         *
@@ -25,10 +25,22 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF          *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH *
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.              *
- * This code is wrapped using JHLidarLite github repository Licensed Under *
- * MIT License, located at include/JHLidarLite/ locally. the original copy *
- * of license can be obtained \                                            *
- * from https://github.com/jetsonhacks/JHLidarLite.git                     *
+ *                                                                         *
+ * copy-left Licenses of Dependencies used :                               *
+ *                                                                         *
+ * 1. This code is wrapped using slightly modified version of code         *
+ * in JHLidarLite github repository Licensed Under MIT License. The local  *
+ * copy of license is located at include/JHLidarLite/ .                    *
+ * the original copy of repo's (MIT) license can be obtained from          *
+ * https://github.com/jetsonhacks/JHLidarLite.git                          *
+ *                                                                         *
+ * 2. This repo uses slightly modified FIR filter code, sourced  from      *
+ * https://github.com/pms67/HadesFCS/blob/master/Filtering/C%20Code/FIR.h  *
+ * repository, The above repo is written by Philip M.                      *
+ * (Salmony @ philsal.co.uk), is licensed under BSD 3-Clause License,      *
+ * the copy of same is available in the include/fir_filter/fir_filter.h    *
+ * file locally. The original copy can be obtained from the repo,          *
+ * https://github.com/pms67/HadesFCS/blob/master/LICENSE                   *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef LIDARLITE_DRIVER_H

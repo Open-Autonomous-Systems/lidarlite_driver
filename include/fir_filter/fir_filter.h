@@ -1,18 +1,26 @@
 /*
-*
-* Finite Impulse Response (FIR) Filter
-*
-* Implements a discrete-time FIR filter using a set of coefficients and a
+ *
+ * Finite Impulse Response (FIR) Filter
+ *
+ * Implements a discrete-time FIR filter using a set of coefficients and a
  * circular buffer.
-* Transfer function in z-domain is as follows:
+ * Transfer function in z-domain is as follows:
  * G(z) = c_0 + c_1 * z^-1 + ... + c_(N-1) * z^(N-1)
-* Where c_n is the n-th coefficient and N is the filter order.
-*
-* Written by: Philip M. Salmony @ philsal.co.uk
-* Last changed: 01 Dec 2019
-* Source:
+ * Where c_n is the n-th coefficient and N is the filter order.
+*/
+
+/*
+ * Written by: Philip M. Salmony @ philsal.co.uk
+ * Last changed: 01 Dec 2019
+ * Source:
  * https://github.com/pms67/HadesFCS/blob/master/Filtering/C%20Code/FIR.h
-* BSD 3-Clause License
+ *
+ *  @modified by Mithun Diddi, diddi.m@husky.neu.edu
+ *  Wrapped original code in a class for convenience in Dec 2021.
+ *
+ */
+
+/* BSD 3-Clause License
 Copyright (c) 2019, Philip Salmony, All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
