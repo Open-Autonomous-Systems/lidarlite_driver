@@ -58,6 +58,7 @@ void lldriver_ns::Lidarlite_driver::onInit()
     lidarLiteFIR_ =std::make_shared<FirFilter>(filterCoefficientVec_);
     //
     if(!initializeSensor()) ros::requestShutdown();
+    lastMeasurement_ = 0.0;
     //
     double measurementPeriod = 1.0/lidarRate;
     timer_ = nodeHandle_.createTimer( \
@@ -84,6 +85,12 @@ void lldriver_ns::Lidarlite_driver::getMeasurement(const ros::TimerEvent& e)
                 throw std::invalid_argument(errStr);
             }
             float rawData = float(distance)/100.0; //converting cm to M
+            // perform data validity check
+            rawData = (std::fabs(rawData) > 5e-2) ? rawData : 0.0;
+            rawData = (std::fabs(rawData - lastMeasurement_) <= 10.0) ?
+                    rawData : lastMeasurement_;
+            //
+            lastMeasurement_ = rawData;
             float filteredData;
             filteredData = lidarLiteFIR_->UpdateFilterAndGetOutput(rawData);
 

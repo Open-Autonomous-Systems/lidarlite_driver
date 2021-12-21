@@ -78,6 +78,7 @@ namespace lldriver_ns
         std::shared_ptr<LidarLite> lidarLite_;
         std::shared_ptr<FirFilter> lidarLiteFIR_;
         std::vector<float> filterCoefficientVec_;
+        float lastMeasurement_;
         /* enum class ErrorCodes{
             i2cPortError = 1,
             distanceError = 2
