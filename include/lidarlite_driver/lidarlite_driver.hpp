@@ -19,7 +19,7 @@
  *                                                                         *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS *
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF              *
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  *
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. *
  *                                                                         *
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR        *
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF          *
@@ -47,11 +47,11 @@
 #include "nodelet/nodelet.h"
 #include <nodelet/loader.h>
 #include "pluginlib/class_list_macros.h"
-//#include <tf/tf.h>
+//
 #include <sensor_msgs/Range.h>
-
+//
 //#include <std_srvs/Trigger.h>
-
+//
 #include "JHLidarLite_V2/src/lidarlite.h"
 #include "fir_filter/fir_filter.h"
 namespace lldriver_ns
@@ -76,13 +76,12 @@ namespace lldriver_ns
         ros::Timer timer_;
         void getMeasurement(const ros::TimerEvent& e);
         std::shared_ptr<LidarLite> lidarLite_;
-        //std::unique_ptr<boost::thread> MeasurementThread_;
         std::shared_ptr<FirFilter> lidarLiteFIR_;
         std::vector<float> filterCoefficientVec_;
-        enum class ErrorCodes{
+        /* enum class ErrorCodes{
             i2cPortError = 1,
             distanceError = 2
-        };
+        };*/
     };	//Lidarlite_driver_class
 } // lldriver_ns
 #endif // LIDARLITE_DRIVER_H
