@@ -51,20 +51,24 @@
     <arg name="debug"       default="true" doc="set True for debug messages"/>
     
   
-	<env name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/std_console.conf"/>
-    <env if="$(arg debug)"  name="ROSCONSOLE_CONFIG_FILE" value="$(find lidarlite_driver)/cfg/debug_console.conf"/>
+	<env name="ROSCONSOLE_CONFIG_FILE"
+         value="$(find lidarlite_driver)/cfg/std_console.conf"/>
+    <env if="$(arg debug)" name="ROSCONSOLE_CONFIG_FILE"
+         value="$(find lidarlite_driver)/cfg/debug_console.conf"/>
     
     <!-- nodelet manager  -->
     <node pkg="nodelet" type="nodelet" name="$(arg manager)" output="screen"
-          args="manager" unless="$(arg external_manager)"/>
+          required="true" args="manager" unless="$(arg external_manager)"/>
     <!--  Launch lidarlite_driver_nodelet -->
     <node pkg="nodelet" type="nodelet" name="lidarlite" output="screen"
-            clear_params="true" args="load lldriver_ns/Lidarlite_driver $(arg manager)">
+          clear_params="true"
+          args="load lldriver_ns/Lidarlite_driver $(arg manager)">
     
         <param name="robot_ns"          value="/$(arg robot_ns)" />
         <param name="tf_prefix"         value="$(arg robot_ns)" />
         <param name="sensor_location"   value="$(arg sensor_location)" />
         <param name="lidar_rate"        value="$(arg lidar_rate)" type="int" />
         <param name="i2cBus"            value="$(arg i2cBus)" type="int" />
+        <rosparam param="filter_coefficients">[ 0.0, 1.5 , 3 ,6, 7,8]</rosparam>
     </node>
 </launch>

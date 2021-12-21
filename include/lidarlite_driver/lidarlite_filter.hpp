@@ -33,33 +33,19 @@
  
 #ifndef LIDARLITE_FILTER_H  
 #define LIDARLITE_FILTER_H 
-/*
 // System includes
 #include "unistd.h"
 #include <iostream>
 #include <string>
-// boost includes
-#include <boost/thread.hpp>
-// ROS includes
-#include <ros/ros.h>
-
-*/
 namespace lldriver_ns
 {
-	class Lidarlite_filter
+	class FirFilter
 	{
-		public:
-			Lidarlite_filter();
-			virtual ~Lidarlite_filter();
-
-			//void measurementloop();
-		private:
-			//std::string robot_ns_, tf_prefix_, sensor_location_;
-			//double lidar_rate_;
-			//bool readparams();
-			//void ros_reg_topics();
-    	    //LidarLite *lidarLite_;
-        	//std::unique_ptr<boost::thread> MeasurementThread_;
-    };	//Lidarlite_filter class
+    public:
+        FirFilter();
+        ~FirFilter()= default;
+    private:
+        bool initVar{};
+    };	//FirFilter class
 } // lldriver_ns
 #endif // LIDARLITE_FILTER_H

@@ -30,9 +30,9 @@
  * of license can be obtained \                                            *
  * from https://github.com/jetsonhacks/JHLidarLite.git                     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
- 
-#ifndef LIDARLITE_DRIVER_H  
-#define LIDARLITE_DRIVER_H 
+
+#ifndef LIDARLITE_DRIVER_H
+#define LIDARLITE_DRIVER_H
 
 // System includes
 #include "unistd.h"
@@ -53,28 +53,36 @@
 //#include <std_srvs/Trigger.h>
 
 #include "JHLidarLite_V2/src/lidarlite.h"
-
+#include "fir_filter/fir_filter.h"
 namespace lldriver_ns
 {
-	class Lidarlite_driver: public nodelet::Nodelet
-	{
-		public:
-			Lidarlite_driver();
-			virtual ~Lidarlite_driver();
-
-			void measurementloop();
-		private:
-			virtual void onInit();
-			ros::NodeHandle nodeHandle_,nodeHandlePvt_;
-		   	ros::Publisher rangePub_;
-			//ros::ServiceServer zeroingRangeSrv_;
-			std::string robot_ns_, tf_prefix_, sensor_location_;
-			double lidar_rate_;
-			int i2cBus_;
-			bool readparams();
-			void ros_reg_topics();
-    	    		LidarLite *lidarLite_;
-        		std::unique_ptr<boost::thread> MeasurementThread_;
+    class Lidarlite_driver: public nodelet::Nodelet
+    {
+    public:
+        Lidarlite_driver();
+        ~Lidarlite_driver();
+    private:
+        virtual void onInit();
+        ros::NodeHandle nodeHandle_,nodeHandlePvt_;
+        ros::Publisher rangePub_, filteredRangePub_;
+        //ros::ServiceServer zeroingRangeSrv_;
+        std::string robot_ns_, tf_prefix_, sensor_location_;
+        std::string sensorFrameId_;
+        int i2cBus_;
+        bool readParams();
+        void register2Ros();
+        bool initializeSensor();
+        double lidarRate;
+        ros::Timer timer_;
+        void measurementLoop(const ros::TimerEvent& e);
+        std::shared_ptr<LidarLite> lidarLite_;
+        //std::unique_ptr<boost::thread> MeasurementThread_;
+        std::shared_ptr<FirFilter> lidarLiteFIR_;
+        std::vector<float> filterCoefficientVec_;
+        enum class ErrorCodes{
+            i2cPortError = 1,
+            distanceError = 2
+        };
     };	//Lidarlite_driver_class
 } // lldriver_ns
 #endif // LIDARLITE_DRIVER_H

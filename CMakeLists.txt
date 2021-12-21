@@ -67,9 +67,9 @@ include_directories(
 )
 
 add_library(lidarlite_driver_lib src/lidarlite_driver.cpp
-        src/lidarlite_filter.cpp
         include/JHLidarLite_V2/src/lidarlite.cpp
-        include/JHLidarLite_V2/src/lidarlite.h)
+        include/JHLidarLite_V2/src/lidarlite.h
+        include/fir_filter/fir_filter.h)
 
 if(${i2c_from_linux} STREQUAL 1)
   set(ADDITIONAL_LIBRARIES i2c)
