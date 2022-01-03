@@ -67,6 +67,7 @@
 #include "JHLidarLite_V2/src/lidarlite.h"
 #include "fir_filter/fir_filter.h"
 #include "median_filter/median_filter.h"
+
 namespace lldriver_ns
 {
     class Lidarlite_driver: public nodelet::Nodelet
@@ -89,7 +90,8 @@ namespace lldriver_ns
         ros::Timer timer_;
         void getMeasurement(const ros::TimerEvent& e);
         std::shared_ptr<LidarLite> lidarLite_;
-        std::shared_ptr<FirFilter> lidarLiteFIR_;
+        std::shared_ptr<FirFilter> llFirPtr_;
+        std::shared_ptr<MedianFilter<float, 5>> llMedianFilterPtr_;
         std::vector<float> filterCoefficientVec_;
         float lastMeasurement_;
         /* enum class ErrorCodes{

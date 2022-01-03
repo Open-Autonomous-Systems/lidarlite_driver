@@ -57,7 +57,8 @@ lldriver_ns::Lidarlite_driver::~Lidarlite_driver()
     // close i2c port and delete obj
     if(lidarLite_->kI2CFileDescriptor > 0) lidarLite_->closeLidarLite();
     lidarLite_.reset();
-    lidarLiteFIR_.reset();
+    llMedianFilterPtr_.reset();
+    llFirPtr_.reset();
 }
 
 void lldriver_ns::Lidarlite_driver::onInit()
@@ -67,7 +68,8 @@ void lldriver_ns::Lidarlite_driver::onInit()
     ROS_ASSERT(readParams());
     register2Ros();
     lidarLite_ = std::make_shared<LidarLite>(i2cBus_);
-    lidarLiteFIR_ =std::make_shared<FirFilter>(filterCoefficientVec_);
+    llMedianFilterPtr_ = std::make_shared<MedianFilter<float, 5>>();
+    llFirPtr_ =std::make_shared<FirFilter>(filterCoefficientVec_);
     //
     if(!initializeSensor()) ros::requestShutdown();
     lastMeasurement_ = 0.0;
@@ -98,36 +100,59 @@ void lldriver_ns::Lidarlite_driver::getMeasurement(const ros::TimerEvent& e)
             }
             float rawData = float(distance)/100.0; //converting cm to M
             // perform data validity check
-            rawData = (std::fabs(rawData) > 5e-2) ? rawData : 0.0;
-            rawData = (std::fabs(rawData - lastMeasurement_) <= 10.0) ?
-                    rawData : lastMeasurement_;
+            // When sensor is closer to ground/ surface, output is mostly
+            // non-linear upto 40 cm. In this code, any data reported less
+            // than 10 cm will be reported as zero
+            rawData = (std::fabs(rawData) > 1e-1) ? rawData : 0.0;
+            // Two methods to filter outliers (commenting second one)
+            // 1. Median filter of window 5,
+            // 2. Velocity method, if delta(range)/delta(one sample time) is
+            // greater than 2 meters, not realistic for our uav, altitude range
+            // when sampling at 60 Hz, we set raw data to lastMeasurement_
+            float medianFilteredData;
+            // assumes the median filter is bootstrapped with its window
+            // size, otherwise first few values would be zeros.
+            medianFilteredData = llMedianFilterPtr_->Insert(rawData);
             //
-            lastMeasurement_ = rawData;
-            float filteredData;
-            filteredData = lidarLiteFIR_->UpdateFilterAndGetOutput(rawData);
+            // second vel method commented
+            /*rawData = (std::fabs(rawData - lastMeasurement_) <= 10.0) ?
+                    rawData : lastMeasurement_;
+            lastMeasurement_ = rawData;*/
+            //
+            float firFilteredData;
+            //firFilteredData = llFirPtr_->UpdateFilterAndGetOutput(rawData);
+            // assumes, fir is bootstrapped with window size.
+            firFilteredData = llFirPtr_->UpdateFilterAndGetOutput(medianFilteredData);
 
-            // publish
-            sensor_msgs::RangePtr rangeMsgPtr;
-            rangeMsgPtr.reset(new sensor_msgs::Range());
-            rangeMsgPtr->header.stamp = msgTime;
-            rangeMsgPtr->header.frame_id = sensorFrameId_;
-            rangeMsgPtr->radiation_type = sensor_msgs::Range::INFRARED;
-            rangeMsgPtr->field_of_view = 0.008; //8 milliRadians
-            rangeMsgPtr->min_range = 0.010; //approx 1 cm
-            rangeMsgPtr->max_range = 40.0; //max distance of 40.0 M
-            rangeMsgPtr->range = rawData;
-            rangePub_.publish(rangeMsgPtr);
-            // publish filtered data
-            sensor_msgs::RangePtr filteredRangeMsgPtr;
-            filteredRangeMsgPtr.reset(new sensor_msgs::Range());
-            filteredRangeMsgPtr->header.stamp = msgTime;
-            filteredRangeMsgPtr->header.frame_id = sensorFrameId_;
-            filteredRangeMsgPtr->radiation_type = sensor_msgs::Range::INFRARED;
-            filteredRangeMsgPtr->field_of_view = 0.008; //8 milliRadians
-            filteredRangeMsgPtr->min_range = 0.010; //approx 1 cm
-            filteredRangeMsgPtr->max_range = 40.0; //max distance of 40.0 M
-            filteredRangeMsgPtr->range = filteredData;
-            filteredRangePub_.publish(filteredRangeMsgPtr);
+            if (rangePub_.getNumSubscribers() > 0)
+            {
+                // publish raw data after setting data , 0.1m to zero,
+                sensor_msgs::RangePtr rangeMsgPtr;
+                rangeMsgPtr.reset(new sensor_msgs::Range());
+                rangeMsgPtr->header.stamp = msgTime;
+                rangeMsgPtr->header.frame_id = sensorFrameId_;
+                rangeMsgPtr->radiation_type = sensor_msgs::Range::INFRARED;
+                rangeMsgPtr->field_of_view = 0.008; //8 milliRadians
+                rangeMsgPtr->min_range = 0.010; //approx 1 cm
+                rangeMsgPtr->max_range = 40.0; //max distance of 40.0 M
+                rangeMsgPtr->range = rawData;
+                rangePub_.publish(rangeMsgPtr);
+            }
+
+            if(filteredRangePub_.getNumSubscribers() > 0)
+            {
+                // publish filtered data
+                sensor_msgs::RangePtr filteredRangeMsgPtr;
+                filteredRangeMsgPtr.reset(new sensor_msgs::Range());
+                filteredRangeMsgPtr->header.stamp = msgTime;
+                filteredRangeMsgPtr->header.frame_id = sensorFrameId_;
+                filteredRangeMsgPtr->radiation_type = sensor_msgs::Range::INFRARED;
+                filteredRangeMsgPtr->field_of_view = 0.008; //8 milliRadians
+                filteredRangeMsgPtr->min_range = 0.010; //approx 1 cm
+                filteredRangeMsgPtr->max_range = 40.0; //max distance of 40.0 M
+                filteredRangeMsgPtr->range = firFilteredData;
+                filteredRangePub_.publish(filteredRangeMsgPtr);
+            }
         }
     }
     catch(std::invalid_argument ex)
