@@ -36,8 +36,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   nodelet
-  #tf
   roslaunch
+  rosbag
 )
 roslaunch_add_file_check(launch)
 
@@ -92,7 +92,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -std=c++11")
 add_executable (lidarlite_node src/lidarlite_driver_node.cpp)
 target_link_libraries(lidarlite_node ${catkin_LIBRARIES})
 
-install(TARGETS lidarlite_node lidarlite_driver_lib
+add_executable (filter_test_node tests/filter_offline_test.cpp include/fir_filter/fir_filter.h include/median_filter/median_filter.h)
+add_dependencies(filter_test_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(filter_test_node ${catkin_LIBRARIES})
+
+install(TARGETS lidarlite_node filter_test_node lidarlite_driver_lib
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

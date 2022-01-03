@@ -66,6 +66,7 @@
 //
 #include "JHLidarLite_V2/src/lidarlite.h"
 #include "fir_filter/fir_filter.h"
+#include "median_filter/median_filter.h"
 namespace lldriver_ns
 {
     class Lidarlite_driver: public nodelet::Nodelet
