@@ -1,7 +1,8 @@
 # lidarlite_driver
 
+ros wrapper for lidarlite 
 
-ros wrapper for lidarlite code originally from https://github.com/jetsonhacks/JHLidarLite.git
+Migrating the repository I developed at the field robotics lab at NU to Open autonomous systems llc for sustained maintenance.
 
 
 known to work with lidarlite v2 and v3
